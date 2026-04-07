@@ -5,10 +5,16 @@ def main(page: ft.Page):
     page.vertical_alignment = "center"
     page.horizontal_alignment = "center"
     page.scroll = ft.ScrollMode.ALWAYS
-    page.theme = ft.ThemeMode.LIGHT
- 
+
     # def loginjuanpao(e):
-         
+        #la cosa del login
+    def changetheme(e):
+        page.theme_mode = (
+            ft.ThemeMode.DARK if darklight.value else ft.ThemeMode.LIGHT
+        )
+        page.update()
+ 
+    darklight = ft.Switch(label="🌞/🌙", value=False, on_change=changetheme)
     def getNoticia(e):
    
             url=f"https://newsapi.org/v2/everything?q=%7B{noticia.value}%7D&from=2026-03-22&sortBy=popularity&apiKey=ea55e105b5914e7f92a9dc6f162f456b"
@@ -55,7 +61,8 @@ def main(page: ft.Page):
             urltoimg,
             descr,
             content,
-            publishedAt
+            publishedAt,
+            darklight
  
 ]    ))
 ft.app(target=main)
