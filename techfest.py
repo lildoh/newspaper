@@ -7,6 +7,8 @@ def main(page: ft.Page):
     page.vertical_alignment = "center"
     page.horizontal_alignment = "center"
     page.scroll = ft.ScrollMode.ALWAYS
+    #home
+    
 
     #login
 
@@ -29,15 +31,16 @@ def main(page: ft.Page):
     login = ft.ElevatedButton("Login", on_click=loginf)
     signup = ft.ElevatedButton("Create password", on_click=signupf)
 
+    def show_log(e):
+        appcontainer.visible = False
+        homecontainer.visible = False
+        logincontainer.visible=True
+        page.update()
+    
     def show_app():
         logincontainer.visible = False
         appcontainer.visible = True
         page.update()
-
-
-    
-
-   
   
 
     #news
@@ -81,6 +84,18 @@ def main(page: ft.Page):
     noticia = ft.TextField(label="Que noticia deseas investigar?")
     jamon=ft.ElevatedButton("Buscar", on_click=getNoticia)
 
+
+
+    logrequired = ft.ElevatedButton("Login required", on_click=show_log)
+    
+    homecontainer = ft.Column([
+        ft.Text(value="Welcome to", size = 20),
+        ft.Text(value="NEWSNAMEIDK", weight=ft.FontWeight.BOLD,size = 50, italic= True ),
+        logrequired
+
+        ], visible=True,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        )
     appcontainer = ft.Column([
         noticia,
         jamon,
@@ -101,18 +116,19 @@ def main(page: ft.Page):
     else:
         login.visible = False
         passwordbox.label = "Create password"
-
+    
     logincontainer = ft.Column(
         [
             ft.Text("Login required", size=25),
             passwordbox,
             login,
-            signup
-        ],
+            signup,
+        ],  visible = False,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER
     )
 
     page.add(
+        homecontainer,
         logincontainer,
         appcontainer
     )
