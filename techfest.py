@@ -1,7 +1,24 @@
 import flet as ft
 import requests
 import os
+import sqlite3
+conn = sqlite3.connect("Newspaper.db", check_same_thread=False)
  
+cursor = conn.cursor()
+ 
+guardalnoticia = """
+                    CREATE TABLE IF NOT EXISTS Noticias_guardadas(
+                        idnoticia INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        Titulo VARCHAR(50) NOT NULL                    );
+                    """
+ 
+article_select = "SELECT * FROM Noticias_guardadas"
+ 
+cursor.execute(guardalnoticia)
+ 
+results = cursor.fetchall()
+ 
+#--------
 def main(page: ft.Page):
     page.title = "jauncarlo"
     page.vertical_alignment = "center"
@@ -39,6 +56,12 @@ def main(page: ft.Page):
     login = ft.ElevatedButton("Login", on_click=loginf)
     signup = ft.ElevatedButton("Create password", on_click=signupf)
  
+    def show_app():
+        logincontainer.visible = False
+        appcontainer.visible = True
+        button_back.visible = False
+        page.update()
+ 
     def show_log(e):
         appcontainer.visible = False
         homecontainer.visible = False
@@ -48,6 +71,8 @@ def main(page: ft.Page):
     def show_app():
         logincontainer.visible = False
         appcontainer.visible = True
+        button_back.visible = False
+        allsaved_articles.visible = False
         page.update()
  
  
@@ -80,6 +105,38 @@ def main(page: ft.Page):
             page.update()
  
         page.update()
+    def go_back(e):
+        button_back.visible = False
+        descr.visible = True
+        title.visible = True
+        author.visible = True
+        butontourl.visible = True
+        urltoimg.visible = True
+        publishedAt.visible = True
+        content.visible = True
+        noticia.visible = True
+        jamon.visible = True
+        button_save.visible = True
+        saved_articles.visible = True
+        allsaved_articles.visible = False
+        page.update()
+ 
+ 
+    def saved_artcl(e):
+        button_back.visible = True
+        descr.visible = False
+        title.visible = False
+        author.visible = False
+        butontourl.visible = False
+        urltoimg.visible = False
+        publishedAt.visible = False
+        content.visible = False
+        noticia.visible = False
+        jamon.visible = False
+        button_save.visible = False
+        saved_articles.visible = False
+        allsaved_articles.visible = True
+        page.update()
  
     descr = ft.Text(value="", size=30)
     title = ft.Text(value="", size=50, weight="bold")
@@ -88,12 +145,31 @@ def main(page: ft.Page):
     urltoimg = ft.Image(src = "bruh.png")
     publishedAt = ft.Text(value="", size=10, color="black")
     content = ft.Text(value="", size=20)
+    button_back = ft.ElevatedButton(text="Go back", on_click=go_back)
+    saved_articles = ft.ElevatedButton(text="Saved news", on_click=saved_artcl)
+    allsaved_articles = ft.Dropdown(label= "SAVED ARTICLES",
+                                    options=[
  
+                                    ])
     noticia = ft.TextField(label="Que noticia deseas investigar?")
     jamon=ft.ElevatedButton("Buscar", on_click=getNoticia)
  
-    logrequired = ft.ElevatedButton("Login/Sign in", on_click=show_log)
-   
+    logrequired = ft.ElevatedButton("Login/Sign in", on_click=show_log) #PUT INTO J2 CODE
+ 
+
+ 
+    def save(e):
+        insertNoticia = "INSERT INTO Noticias_guardadas (Titulo) VALUES (?)"
+        cursor.execute(insertNoticia, (title.value,))
+        cursor.execute("SELECT Titulo FROM Noticias_guardadas")
+        noticias = cursor.fetchall()
+        allsaved_articles.options.clear()
+        for news in noticias:
+            allsaved_articles.options.append(ft.dropdown.Option(text=news[0]))
+        conn.commit()
+        page.update()
+ 
+    button_save = ft.ElevatedButton(text="Save news", on_click=save)
     homecontainer = ft.Column([
         ft.Text(value="Welcome to", size = 20),
         ft.Text(value="NEWSNAMEIDK", weight=ft.FontWeight.BOLD,size = 50, italic= True ),
@@ -111,7 +187,11 @@ def main(page: ft.Page):
             urltoimg,
             descr,
             content,
-            publishedAt
+            publishedAt,
+            button_save,
+            saved_articles,
+            button_back,
+            allsaved_articles
         ])
     ], visible=False)
  
@@ -141,4 +221,3 @@ def main(page: ft.Page):
     )
  
 ft.app(target=main)
- 
