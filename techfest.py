@@ -14,7 +14,7 @@ guardalnoticia = """
                         FOREIGN KEY(usarioid) REFERENCES Usarsario(idusuario)                  );
                     """
 users= """ CREATE TABLE IF NOT EXISTS Usarsario( idusuario INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                                                 usarmame VARCHAR(40) NOT NULL,
+                                                 usarmame VARCHAR(40) UNIQUE NOT NULL,
                                                  password VARCHAR(40) NOT NULL);"""
 
 article_select = "SELECT * FROM Noticias_guardadas"
@@ -36,7 +36,7 @@ def main(page: ft.Page):
     #light yagami
     def changetheme(e):
         page.theme_mode = (
-            ft.ThemeMode.DARK if darklight.value else ft.ThemeMode.LIGHT
+            ft.ThemeMode.LIGHT if darklight.value else ft.ThemeMode.DARK
         )
         page.update()
  
