@@ -51,6 +51,11 @@ def main(page: ft.Page):
            pernambucano=(userbox.value, passwordbox.value)
            cursor.execute(regitro, pernambucano)
            conn.commit()
+           getid="SELECT idusuario FROM Usarsario WHERE usarmame=? AND password=?"
+           cursor.execute(getid, pernambucano)
+           result=cursor.fetchone()
+           if result:
+              currentuser["id"]=result[0]
            show_app()
        except sqlite3.IntegrityError:
            userbox.label= "ta cojio"
@@ -75,11 +80,7 @@ def main(page: ft.Page):
     login = ft.ElevatedButton("Login", on_click=loginf)
     signup = ft.ElevatedButton("Create password", on_click=signupf)
  
-    def show_app():
-        logincontainer.visible = False
-        appcontainer.visible = True
-        button_back.visible = False
-        page.update()
+
  
     def show_log(e):
         appcontainer.visible = False
@@ -203,12 +204,14 @@ def main(page: ft.Page):
      else:
         return
     def save(e):
-     if currentuser["id"] and title.value:
+     if currentuser["id"] is not None and title.value !="":
+        print("GUARDANDO:", title.value, currentuser["id"]) #debug temporal se puede borra
         saveforuser="INSERT INTO Noticias_guardadas (Titulo, usarioid) VALUES (?, ?)"
         masambucano=(title.value, currentuser["id"])
         cursor.execute(saveforuser, masambucano)
         conn.commit()
         loadarticlef()
+        print("USER:", currentuser["id"]) #debug temporal lo pueden borra
      else:
         return
     def deletef(e):
