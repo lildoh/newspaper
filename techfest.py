@@ -16,6 +16,7 @@ guardalnoticia = """
 users= """ CREATE TABLE IF NOT EXISTS Usarsario( idusuario INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
                                                  usarmame VARCHAR(40) NOT NULL,
                                                  password VARCHAR(40) NOT NULL);"""
+
 article_select = "SELECT * FROM Noticias_guardadas"
 cursor.execute(users)
 cursor.execute(guardalnoticia)
@@ -78,7 +79,7 @@ def main(page: ft.Page):
      else:
         return
     login = ft.ElevatedButton("Login", on_click=loginf)
-    signup = ft.ElevatedButton("Create password", on_click=signupf)
+    signup = ft.ElevatedButton("sign up", on_click=signupf)
  
 
  
