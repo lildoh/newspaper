@@ -145,7 +145,7 @@ def main(page: ft.Page):
         allsaved_articles.visible = False
         page.update()
  
-    def opensav(e):
+    def opensav(e): #falta q te ponga la noticia entera no nama el titulo
        if allsaved_articles.value:
           sech="SELECT Titulo FROM Noticias_guardadas WHERE Titulo=? AND usarioid=?"
           framnambucano=(allsaved_articles.value,currentuser["id"])
