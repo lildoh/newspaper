@@ -56,7 +56,7 @@ def main(page: ft.Page):
     currentuser= None
     def loginf(e):
         global currentuser
-        inisiasesion="SELECT idusuario FROM Usarsario WHERE username=? AND password=?"
+        inisiasesion="SELECT idusuario FROM Usarsario WHERE usarmame=? AND password=?"
         perfamtutano=(userbox.value, passwordbox.value)   
         cursor.execute(inisiasesion, perfamtutano)
         result= cursor.fetchone()
@@ -149,6 +149,7 @@ def main(page: ft.Page):
         button_save.visible = False
         saved_articles.visible = False
         allsaved_articles.visible = True
+        loadarticlef()
         page.update()
  
     descr = ft.Text(value="", size=30)
@@ -171,12 +172,9 @@ def main(page: ft.Page):
  
 
  
-    def save(e):
-     saveforuser="INSERT INTO Noticias_guardadas (Titulo, usarioid) VALUES (?, ?)"
-     masambucano=(title.value, currentuser)
-     cursor.execute(saveforuser, masambucano)
+    
     def loadarticlef(e):
-     loadarticle="SELECT Titulo FROM Noticias_guardadas WHERE usuario_id=?"
+     loadarticle="SELECT Titulo FROM Noticias_guardadas WHERE usarioid=?"
      membucano=(currentuser)
      cursor.execute(loadarticle, membucano)
      noticias= cursor.fetchall()
@@ -184,11 +182,18 @@ def main(page: ft.Page):
      for i in noticias:
          allsaved_articles.options.append(ft.dropdown.Option(text=i[0]))
      page.update()
+    def save(e):
+     saveforuser="INSERT INTO Noticias_guardadas (Titulo, usarioid) VALUES (?, ?)"
+     masambucano=(title.value, currentuser)
+     cursor.execute(saveforuser, masambucano)
+     conn.commit()
+     loadarticlef()
     def deletef(e):
      if allsaved_articles.value:
-         delete= "DELETE FROM Noticias_guardadas WHERE Titulo=? AND usuario_id=?"
+         delete= "DELETE FROM Noticias_guardadas WHERE Titulo=? AND usarioid=?"
          german=(allsaved_articles.value, currentuser)
          cursor.execute(delete, german)
+         conn.commit()
          loadarticlef()
      else:
          return
