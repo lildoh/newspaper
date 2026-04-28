@@ -45,27 +45,33 @@ def main(page: ft.Page):
     userbox= ft.TextField(label="user")
     passwordbox = ft.TextField(label="Password",password=True)
     def signupf(e):
+     if userbox.value and passwordbox.value:
        try:
            regitro= "INSERT INTO Usarsario(usarmame, password) VALUES (?,?)"
            pernambucano=(userbox.value, passwordbox.value)
            cursor.execute(regitro, pernambucano)
+           conn.commit()
            show_app()
        except sqlite3.IntegrityError:
            userbox.label= "ta cojio"
            page.update()
-    currentuser= None
+     else:
+        return
+    currentuser= {"id":None}
     def loginf(e):
-        global currentuser
+     if userbox.value and passwordbox.value:
         inisiasesion="SELECT idusuario FROM Usarsario WHERE usarmame=? AND password=?"
         perfamtutano=(userbox.value, passwordbox.value)   
         cursor.execute(inisiasesion, perfamtutano)
         result= cursor.fetchone()
         if result:
-            currentuser= result[0]
+            currentuser["id"]= result[0]
             show_app()
         else:
             passwordbox.label="no"
             page.update()
+     else:
+        return
     login = ft.ElevatedButton("Login", on_click=loginf)
     signup = ft.ElevatedButton("Create password", on_click=signupf)
  
@@ -92,10 +98,14 @@ def main(page: ft.Page):
     #news
  
     def getNoticia(e):
- 
-        url=f"https://newsapi.org/v2/everything?q={noticia.value}&from=2026-04-1&sortBy=popularity&apiKey=ea55e105b5914e7f92a9dc6f162f456b"
-        requests1=requests.get(url)
-        data= requests1.json()
+        try:
+            url=f"https://newsapi.org/v2/everything?q={noticia.value}&from=2026-04-1&sortBy=popularity&apiKey=ea55e105b5914e7f92a9dc6f162f456b"
+            requests1=requests.get(url)
+            data= requests1.json()
+        except:
+            title.value="error"
+            page.update()
+            return
         articles = data["articles"]
  
         if len(articles) > 0:
@@ -134,7 +144,17 @@ def main(page: ft.Page):
         allsaved_articles.visible = False
         page.update()
  
- 
+    def opensav(e):
+       if allsaved_articles.value:
+          sech="SELECT Titulo FROM Noticias_guardadas WHERE Titulo=? AND usarioid=?"
+          framnambucano=(allsaved_articles.value,currentuser["id"])
+          cursor.execute(sech, framnambucano)
+          resultado= cursor.fetchone()
+          if resultado:
+             title.value=resultado[0]
+             go_back(None)
+       else:
+          return
     def saved_artcl(e):
         button_back.visible = True
         descr.visible = False
@@ -161,10 +181,7 @@ def main(page: ft.Page):
     content = ft.Text(value="", size=20)
     button_back = ft.ElevatedButton(text="Go back", on_click=go_back)
     saved_articles = ft.ElevatedButton(text="Saved news", on_click=saved_artcl)
-    allsaved_articles = ft.Dropdown(label= "SAVED ARTICLES",
-                                    options=[
- 
-                                    ])
+    allsaved_articles = ft.Dropdown(label= "SAVED ARTICLES",options=[ ], on_change=opensav)
     noticia = ft.TextField(label="Que noticia deseas investigar?")
     jamon=ft.ElevatedButton("Buscar", on_click=getNoticia)
  
@@ -173,30 +190,37 @@ def main(page: ft.Page):
 
  
     
-    def loadarticlef(e):
-     loadarticle="SELECT Titulo FROM Noticias_guardadas WHERE usarioid=?"
-     membucano=(currentuser)
-     cursor.execute(loadarticle, membucano)
-     noticias= cursor.fetchall()
-     allsaved_articles.options.clear()
-     for i in noticias:
-         allsaved_articles.options.append(ft.dropdown.Option(text=i[0]))
-     page.update()
+    def loadarticlef():
+     if currentuser["id"]:
+        loadarticle="SELECT Titulo FROM Noticias_guardadas WHERE usarioid=?"
+        membucano=(currentuser["id"],)
+        cursor.execute(loadarticle, membucano)
+        noticias= cursor.fetchall()
+        allsaved_articles.options.clear()
+        for i in noticias:
+            allsaved_articles.options.append(ft.dropdown.Option(key=i[0],text=i[0]))
+        page.update()
+     else:
+        return
     def save(e):
-     saveforuser="INSERT INTO Noticias_guardadas (Titulo, usarioid) VALUES (?, ?)"
-     masambucano=(title.value, currentuser)
-     cursor.execute(saveforuser, masambucano)
-     conn.commit()
-     loadarticlef()
+     if currentuser["id"] and title.value:
+        saveforuser="INSERT INTO Noticias_guardadas (Titulo, usarioid) VALUES (?, ?)"
+        masambucano=(title.value, currentuser["id"])
+        cursor.execute(saveforuser, masambucano)
+        conn.commit()
+        loadarticlef()
+     else:
+        return
     def deletef(e):
      if allsaved_articles.value:
          delete= "DELETE FROM Noticias_guardadas WHERE Titulo=? AND usarioid=?"
-         german=(allsaved_articles.value, currentuser)
+         german=(allsaved_articles.value, currentuser["id"])
          cursor.execute(delete, german)
          conn.commit()
          loadarticlef()
      else:
          return
+    butondelete = ft.ElevatedButton(text="Delete", on_click=deletef)
     button_save = ft.ElevatedButton(text="Save news", on_click=save)
     homecontainer = ft.Column([
         ft.Text(value="Welcome to", size = 20),
@@ -217,6 +241,7 @@ def main(page: ft.Page):
             content,
             publishedAt,
             button_save,
+            butondelete,
             saved_articles,
             button_back,
             allsaved_articles
@@ -225,11 +250,7 @@ def main(page: ft.Page):
  
     #ui login
  
-    if os.path.exists("password.txt"):
-        signup.visible = False
-    else:
-        login.visible = False
-        passwordbox.label = "Create password"
+    
    
     logincontainer = ft.Column(
         [
