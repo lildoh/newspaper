@@ -9,11 +9,15 @@ cursor = conn.cursor()
 guardalnoticia = """
                     CREATE TABLE IF NOT EXISTS Noticias_guardadas(
                         idnoticia INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        Titulo VARCHAR(50) NOT NULL                    );
+                        Titulo VARCHAR(50) NOT NULL  ,
+                        usarioid INTEGER,
+                        FOREIGN KEY(usarioid) REFERENCES Usarsario(idusuario)                  );
                     """
- 
+users= """ CREATE TABLE IF NOT EXISTS Usarsario( idusuario INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                                                 usarmame VARCHAR(40) NOT NULL,
+                                                 password VARCHAR(40) NOT NULL);"""
 article_select = "SELECT * FROM Noticias_guardadas"
- 
+cursor.execute(users)
 cursor.execute(guardalnoticia)
  
 results = cursor.fetchall()
@@ -38,20 +42,29 @@ def main(page: ft.Page):
     darklight = ft.Switch(label="🌞/🌙", value=False, on_change=changetheme)
    
     #login
+    userbox= ft.TextField(label="user")
     passwordbox = ft.TextField(label="Password",password=True)
     def signupf(e):
-        with open("password.txt", "w", encoding="utf-8") as file:
-            file.write(passwordbox.value)
-        show_app()
- 
+       try:
+           regitro= "INSERT INTO Usarsario(usarmame, password) VALUES (?,?)"
+           pernambucano=(userbox.value, passwordbox.value)
+           cursor.execute(regitro, pernambucano)
+           show_app()
+       except sqlite3.IntegrityError:
+           userbox.label= "ta cojio"
+           page.update()
+    currentuser= None
     def loginf(e):
-        with open("password.txt", "r", encoding="utf-8") as file:
-            saved = file.read()
- 
-        if passwordbox.value == saved:
+        global currentuser
+        inisiasesion="SELECT idusuario FROM Usarsario WHERE username=? AND password=?"
+        perfamtutano=(userbox.value, passwordbox.value)   
+        cursor.execute(inisiasesion, perfamtutano)
+        result= cursor.fetchone()
+        if result:
+            currentuser= result[0]
             show_app()
         else:
-            passwordbox.label = "Incorrect password"
+            passwordbox.label="no"
             page.update()
     login = ft.ElevatedButton("Login", on_click=loginf)
     signup = ft.ElevatedButton("Create password", on_click=signupf)
@@ -159,16 +172,26 @@ def main(page: ft.Page):
 
  
     def save(e):
-        insertNoticia = "INSERT INTO Noticias_guardadas (Titulo) VALUES (?)"
-        cursor.execute(insertNoticia, (title.value,))
-        cursor.execute("SELECT Titulo FROM Noticias_guardadas")
-        noticias = cursor.fetchall()
-        allsaved_articles.options.clear()
-        for news in noticias:
-            allsaved_articles.options.append(ft.dropdown.Option(text=news[0]))
-        conn.commit()
-        page.update()
- 
+     saveforuser="INSERT INTO Noticias_guardadas (Titulo, usarioid) VALUES (?, ?)"
+     masambucano=(title.value, currentuser)
+     cursor.execute(saveforuser, masambucano)
+    def loadarticlef(e):
+     loadarticle="SELECT Titulo FROM Noticias_guardadas WHERE usuario_id=?"
+     membucano=(currentuser)
+     cursor.execute(loadarticle, membucano)
+     noticias= cursor.fetchall()
+     allsaved_articles.options.clear()
+     for i in noticias:
+         allsaved_articles.options.append(ft.dropdown.Option(text=i[0]))
+     page.update()
+    def deletef(e):
+     if allsaved_articles.value:
+         delete= "DELETE FROM Noticias_guardadas WHERE Titulo=? AND usuario_id=?"
+         german=(allsaved_articles.value, currentuser)
+         cursor.execute(delete, german)
+         loadarticlef()
+     else:
+         return
     button_save = ft.ElevatedButton(text="Save news", on_click=save)
     homecontainer = ft.Column([
         ft.Text(value="Welcome to", size = 20),
@@ -205,7 +228,7 @@ def main(page: ft.Page):
    
     logincontainer = ft.Column(
         [
-            ft.Text("Login required", size=25),
+            ft.Text("Login required", size=25),userbox,
             passwordbox,
             login,
             signup,
