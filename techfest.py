@@ -27,13 +27,24 @@ def main(page: ft.Page):
     page.horizontal_alignment = "center"
     page.scroll = ft.ScrollMode.ALWAYS
  
- 
     #light yagami
     def changetheme(e):
-        page.theme_mode = (
-            ft.ThemeMode.LIGHT if darklight.value else ft.ThemeMode.DARK
-        )
+        page.theme_mode = ft.ThemeMode.LIGHT if darklight.value else ft.ThemeMode.DARK
+        if darklight.value == True:
+            homecontainer.bgcolor = "#E2E2E2"
+            logincontainer.bgcolor =  "#E2E2E2"
+            appcontainer.content.controls[0].bgcolor ="#E2E2E2"
+            appcontainer.content.controls[1].bgcolor ="#E2E2E2"
+            appcontainer.content.controls[2].bgcolor ="#E2E2E2"
+        else:
+            homecontainer.bgcolor = "#626262"
+            logincontainer.bgcolor =  "#626262"
+            appcontainer.content.controls[0].bgcolor ="#626262"
+            appcontainer.content.controls[1].bgcolor ="#626262"
+            appcontainer.content.controls[2].bgcolor ="#626262"
         page.update()
+
+    
     darklight = ft.Switch(label="🌙/🌞", value=False, on_change=changetheme)
     #login
     userbox= ft.TextField(label="user")
@@ -285,7 +296,8 @@ def main(page: ft.Page):
     previous_noticia = ft.ElevatedButton("<- Prev", on_click=going_back)
     next_noticia = ft.ElevatedButton("Next ->", on_click=foward_noticia)
     gobacklog = ft.ElevatedButton("<- Login", on_click = go_backtolog)
-   
+
+
     passy_text = ft.Text("")
     passy = ft.BottomSheet(
     content=ft.Container(
@@ -414,7 +426,7 @@ def main(page: ft.Page):
                     ),
                     padding=15,
                     border_radius=15,
-                    bgcolor="#626262",
+                    bgcolor = "#626262",
                     width=250
  
                 ),
